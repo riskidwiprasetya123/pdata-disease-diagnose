@@ -5,9 +5,10 @@ import joblib
 from datetime import datetime
 
 # ==============================
-# PAGE CONFIG# ==============================
+# PAGE CONFIG
+# ==============================
 st.set_page_config(
-    page_title="Disease Diagnosis System",
+    page_title="Sistem Diagnosis Penyakit",
     page_icon="🩺",
     layout="wide"
 )
@@ -31,38 +32,38 @@ FEATURE_COLUMNS = joblib.load("features.pkl")
 # HEADER
 # ==============================
 st.markdown("""
-# 🩺 Disease Diagnosis System  
-#### Supervised Learning-based Medical Prediction Application
+# 🩺 Sistem Diagnosis Penyakit  
+#### Aplikasi Prediksi Medis Berbasis Supervised Learning
 ---
 """)
 
 # ==============================
 # SIDEBAR — INPUT
 # ==============================
-st.sidebar.header("👤 Patient Information")
+st.sidebar.header("👤 Informasi Pasien")
 
-patient_name = st.sidebar.text_input("Patient Name", placeholder="Enter patient name")
-age = st.sidebar.number_input("Age", 1, 120, 25)
-gender = st.sidebar.selectbox("Gender", le_gender.classes_)
-
-st.sidebar.divider()
-st.sidebar.subheader("🧾 Symptoms")
-symptom1 = st.sidebar.selectbox("Symptom 1", le_s1.classes_)
-symptom2 = st.sidebar.selectbox("Symptom 2", le_s2.classes_)
-symptom3 = st.sidebar.selectbox("Symptom 3", le_s3.classes_)
+patient_name = st.sidebar.text_input("Nama Pasien", placeholder="Masukkan nama pasien")
+age = st.sidebar.number_input("Usia", 1, 120, 25)
+gender = st.sidebar.selectbox("Jenis Kelamin", le_gender.classes_)
 
 st.sidebar.divider()
-st.sidebar.subheader("❤️ Vital Signs")
-heart_rate = st.sidebar.number_input("Heart Rate (bpm)", 40, 200, 75)
-temperature = st.sidebar.number_input("Body Temperature (°C)", value=36.5)
-oxygen = st.sidebar.number_input("Oxygen Saturation (%)", 70, 100, 98)
+st.sidebar.subheader("🧾 Gejala")
+symptom1 = st.sidebar.selectbox("Gejala 1", le_s1.classes_)
+symptom2 = st.sidebar.selectbox("Gejala 2", le_s2.classes_)
+symptom3 = st.sidebar.selectbox("Gejala 3", le_s3.classes_)
 
 st.sidebar.divider()
-st.sidebar.subheader("🩸 Blood Pressure")
-systolic = st.sidebar.number_input("Systolic (mmHg)", 80, 250, 120)
-diastolic = st.sidebar.number_input("Diastolic (mmHg)", 40, 150, 80)
+st.sidebar.subheader("❤️ Tanda Vital")
+heart_rate = st.sidebar.number_input("Denyut Jantung (bpm)", 40, 200, 75)
+temperature = st.sidebar.number_input("Suhu Tubuh (°C)", value=36.5)
+oxygen = st.sidebar.number_input("Saturasi Oksigen (%)", 70, 100, 98)
 
-predict_btn = st.sidebar.button("🔍 Run Diagnosis")
+st.sidebar.divider()
+st.sidebar.subheader("🩸 Tekanan Darah")
+systolic = st.sidebar.number_input("Sistolik (mmHg)", 80, 250, 120)
+diastolic = st.sidebar.number_input("Diastolik (mmHg)", 40, 150, 80)
+
+predict_btn = st.sidebar.button("🔍 Jalankan Diagnosis")
 
 # ==============================
 # MAIN LAYOUT
@@ -70,42 +71,41 @@ predict_btn = st.sidebar.button("🔍 Run Diagnosis")
 left_col, right_col = st.columns([1.3, 1])
 
 with left_col:
-    st.subheader("🧾 Patient Summary")
+    st.subheader("🧾 Ringkasan Pasien")
 
-    check_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+    check_time = datetime.now().strftime("%d-%m-%Y %H:%M")
 
     receipt_text = f"""
 ------------------------------
-      MEDICAL CHECK RECEIPT
+      KWITANSI PEMERIKSAAN MEDIS
 ------------------------------
-Patient Name : {patient_name if patient_name else '-'}
-Age          : {age}
-Gender       : {gender}
+Nama Pasien   : {patient_name if patient_name else '-'}
+Usia          : {age} tahun
+Jenis Kelamin : {gender}
 
-Symptoms
+Gejala
 - {symptom1}
 - {symptom2}
 - {symptom3}
 
-Vital Signs
-Heart Rate   : {heart_rate} bpm
-Temperature  : {temperature} °C
-Oxygen Sat   : {oxygen} %
-Blood Press. : {systolic} / {diastolic} mmHg
+Tanda Vital
+Denyut Jantung: {heart_rate} bpm
+Suhu Tubuh    : {temperature} °C
+Oksigen       : {oxygen} %
+Tekanan Darah : {systolic} / {diastolic} mmHg
 ------------------------------
-Check Time   : {check_time}
+Waktu Cek     : {check_time}
 ------------------------------
 """
 
     st.code(receipt_text, language="text")
 
-
 with right_col:
-    st.subheader("🧠 Diagnosis Result")
+    st.subheader("🧠 Hasil Diagnosis")
 
     if predict_btn:
         if patient_name.strip() == "":
-            st.error("⚠️ Please enter patient name before running diagnosis.")
+            st.error("⚠️ Masukkan nama pasien sebelum menjalankan diagnosis.")
         else:
             input_df = pd.DataFrame([{
                 'Age': age,
@@ -129,15 +129,15 @@ with right_col:
             diagnosis = le_diag.inverse_transform([pred_encoded])[0]
             treatment = treatment_map.get(
                 pred_encoded,
-                "Consult a medical professional."
+                "Konsultasikan dengan dokter profesional."
             )
 
-            st.success(f"🩺 **Diagnosis for {patient_name}:** {diagnosis}")
-            st.metric("Confidence Level", f"{confidence:.2f}%")
-            st.info(f"💊 **Recommended Treatment:** {treatment}")
+            st.success(f"🩺 **Diagnosis untuk {patient_name}:** {diagnosis}")
+            st.metric("Tingkat Keyakinan", f"{confidence:.2f}%")
+            st.info(f"💊 **Pengobatan yang Direkomendasikan:** {treatment}")
 
     else:
-        st.info("Please complete patient data and click **Run Diagnosis**")
+        st.info("Lengkapi data pasien dan klik **Jalankan Diagnosis**")
 
 # ==============================
 # FOOTER
@@ -145,6 +145,6 @@ with right_col:
 st.markdown("""
 ---
 ⚠️ **Disclaimer:**  
-This application is developed for **educational and research purposes only**  
-and does not replace professional medical diagnosis.
+Aplikasi ini dikembangkan untuk **tujuan pendidikan dan penelitian saja**  
+dan tidak menggantikan diagnosis medis profesional.
 """)
